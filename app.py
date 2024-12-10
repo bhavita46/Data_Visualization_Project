@@ -10,7 +10,7 @@ st.write("Visualization by Vikramjeet Singh Kundu")
 # Load the filtered dataset
 @st.cache
 def load_data():
-    data_path = "filtered_last_6_months_2024.csv"  # Ensure this file is in the same directory
+    data_path = "filtered_data_last_6_months_2024.csv"  
     data = pd.read_csv(data_path)
     return data
 
