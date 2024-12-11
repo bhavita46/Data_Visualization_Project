@@ -42,7 +42,7 @@ def load_map_data():
 # Load contextual data using caching
 @st.cache_data
 def load_contextual_data():
-    context_data_path = 'SPD_Crime_Data__2008-Present_20241122.csv' 
+    context_data_path = 'SPD_Crime_Data__2008-Present_20241122 (1).csv' 
     data = pd.read_csv(context_data_path)
     data['Offense Start DateTime'] = pd.to_datetime(data['Offense Start DateTime'], errors='coerce')
     data['Year'] = data['Offense Start DateTime'].dt.year
