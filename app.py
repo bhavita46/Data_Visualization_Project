@@ -1,12 +1,26 @@
+# Ensuring `plotly, matplotlib and seaborn` are installed
 import subprocess
 import sys
 
-# Ensuring `plotly` is installed
+# Function to install missing libraries
+def install(package):
+    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+
+# Install required libraries
 try:
     import plotly.express as px
 except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "plotly"])
-    import plotly.express as px
+    install("plotly")
+
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    install("matplotlib")
+
+try:
+    import seaborn as sns
+except ImportError:
+    install("seaborn")
 
 import streamlit as st
 import pandas as pd
