@@ -174,7 +174,7 @@ def main():
     plot_911_calls_by_month(crime_data)
     st.write("""This stacked bar chart divides emergency calls into morning (AM) and evening (PM) categories for each month of the year.""")
 
-    plot_911_calls_by_year(crime_data)
+    plot_911_calls_by_month_line(crime_data)
     st.write("""The line chart illustrates annual variations in emergency call volumes.""")
 
     plot_calls_by_priority_and_precinct(crime_data)
