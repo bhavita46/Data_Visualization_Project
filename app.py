@@ -96,12 +96,12 @@ def plot_crime_count_by_precinct(data):
 def plot_crime_categories_over_time(data):
     st.subheader("Crime Categories Over Time")
     time_series_chart = px.line(
-        data.groupby(["datetime", "Crime Against Category"]).size().reset_index(name="Crime Count"),
-        x="datetime",
+        data.groupby(["Offense Start DateTime", "Crime Against Category"]).size().reset_index(name="Crime Count"),
+        x="Offense Start DateTime",
         y="Crime Count",
         color="Crime Against Category",
         title="Crime Categories Over Time",
-        labels={"datetime": "Date", "Crime Count": "Crime Count", "Crime Against Category": "Category"},
+        labels={"Offense Start DateTime": "Date", "Crime Count": "Crime Count", "Crime Against Category": "Category"},
         line_shape="linear",
     )
     time_series_chart.update_layout(
