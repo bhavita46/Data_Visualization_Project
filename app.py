@@ -37,110 +37,122 @@ st.write("Visualization by Bhavita Vijay Bhoir, Rekha Kandukuri, Shefali Saxena,
 # Load the filtered dataset for the map using caching
 @st.cache_data
 def load_map_data():
-    map_data_path = "filtered_data_last_6_months_2024.csv" 
+    map_data_path = "filtered_data_last_6_months_2024.csv"  # Ensure this file is in the same directory
     return pd.read_csv(map_data_path)
 
 # Load contextual data using caching
 @st.cache_data
-def load_contextual_data():
-    context_data_path = 'SPD_Crime_Data__2008-Present_20241122 (1).csv' 
-    data = pd.read_csv(context_data_path)
-    data['Offense Start DateTime'] = pd.to_datetime(data['Offense Start DateTime'], errors='coerce')
-    data['Year'] = data['Offense Start DateTime'].dt.year
-    data = data.dropna(subset=['Year'])
-    data['Year'] = data['Year'].astype(int)
-    data = data[data['Year'] > 2020]
-    data.rename(columns={'Latitude': 'latitude', 'Longitude': 'longitude'}, inplace=True)
-    return data
+def fetch_crime_data(limit=50000):
+    API_URL = "https://data.seattle.gov/resource/33kz-ixgy.json"
+    params = {
+        "$limit": limit,
+        "$where": "blurred_longitude != '-1' AND blurred_latitude != '-1'",
+    }
+    response = requests.get(API_URL, params=params)
+    if response.status_code == 200:
+        data = pd.DataFrame(response.json())
+        data["datetime"] = pd.to_datetime(data["event_clearance_date"], errors="coerce")
+        data["month"] = data["datetime"].dt.month
+        data["year"] = data["datetime"].dt.year
+        data["am_pm"] = data["datetime"].dt.hour.apply(lambda x: "AM" if x < 12 else "PM")
+        return data
+    else:
+        st.error(f"Failed to fetch data: {response.status_code}")
+        return pd.DataFrame()
 
-map_data = load_map_data()
-context_data = load_contextual_data()
+# Visualizations
+def plot_911_calls_by_month(data):
+    st.subheader("911 Calls by Month (AM/PM)")
+    month_grouped = data.groupby(["month", "am_pm"]).size().unstack(fill_value=0)
+    fig, ax = plt.subplots(figsize=(10, 6))
+    month_grouped.plot(kind="bar", stacked=True, ax=ax)
+    ax.set_title("911 Calls by Month (AM/PM)")
+    ax.set_xlabel("Month")
+    ax.set_ylabel("Number of Calls")
+    st.pyplot(fig)
 
-# Map visualization
-st.header("Interactive Crime Location Map")
-st.write("Hover over a point to view the details of the reported crimes.")
-seattle_lat, seattle_lon = 47.608013, -122.335167  # Coordinates for Seattle
-st.pydeck_chart(pdk.Deck(
-    map_style='mapbox://styles/mapbox/light-v9',
-    initial_view_state=pdk.ViewState(
-        latitude=seattle_lat,
-        longitude=seattle_lon,
-        zoom=12,
-        pitch=0,  # Top-down view
-    ),
-    layers=[
-        pdk.Layer(
-            'ScatterplotLayer',
-            data=map_data,
-            get_position='[Longitude, Latitude]',
-            get_color='[200, 30, 0, 160]',
-            get_radius=50,
-            pickable=True,  # Enables interactivity on hover
+def plot_911_calls_by_year(data):
+    st.subheader("911 Calls by Year")
+    year_grouped = data.groupby("year").size()
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(year_grouped.index, year_grouped.values, marker="o", linestyle="-")
+    ax.set_title("911 Calls by Year")
+    ax.set_xlabel("Year")
+    ax.set_ylabel("Number of Calls")
+    st.pyplot(fig)
+
+def plot_calls_by_priority_and_precinct(data):
+    st.subheader("911 Calls by Precinct and Priority")
+    priority_precinct_grouped = data.groupby(["precinct", "priority"]).size().unstack(fill_value=0)
+    fig, ax = plt.subplots(figsize=(10, 6))
+    priority_precinct_grouped.plot(kind="bar", stacked=True, ax=ax)
+    ax.set_title("911 Calls by Precinct and Priority")
+    ax.set_xlabel("Precinct")
+    ax.set_ylabel("Number of Calls")
+    st.pyplot(fig)
+
+# Main Streamlit App
+def main():
+    # Load data
+    map_data = load_map_data()
+    crime_data = fetch_crime_data(limit=50000)
+
+    # Map Visualization
+    st.header("Interactive Crime Location Map")
+    st.write("This map shows reported crimes in Seattle for the last six months of 2024.")
+    seattle_lat, seattle_lon = 47.608013, -122.335167  # Coordinates for Seattle
+    st.pydeck_chart(pdk.Deck(
+        map_style='mapbox://styles/mapbox/light-v9',
+        initial_view_state=pdk.ViewState(
+            latitude=seattle_lat,
+            longitude=seattle_lon,
+            zoom=12,
+            pitch=0,
         ),
-    ],
-    tooltip={
-        "html": """
-        <b>Crime Type:</b> {Offense}<br>
-        <b>Location:</b> {100 Block Address}<br>
-        <b>Date:</b> {Offense Start DateTime}
-        """,
-        "style": {"color": "white"}
-    },
-))
+        layers=[
+            pdk.Layer(
+                'ScatterplotLayer',
+                data=map_data,
+                get_position='[Longitude, Latitude]',
+                get_color='[200, 30, 0, 160]',
+                get_radius=50,
+                pickable=True,
+            ),
+        ],
+        tooltip={
+            "html": """
+            <b>Crime Type:</b> {Offense}<br>
+            <b>Location:</b> {100 Block Address}<br>
+            <b>Date:</b> {Offense Start DateTime}
+            """,
+            "style": {"color": "white"}
+        },
+    ))
 
-# Contextual visualizations
-st.header("Contextual Visualizations")
-st.sidebar.header("Filter Data")
-selected_year = st.sidebar.multiselect(
-    "Select Year(s):",
-    options=context_data['Year'].unique().tolist(),
-    default=context_data['Year'].unique().tolist()
-)
-selected_precinct = st.sidebar.multiselect(
-    "Select Precinct(s):",
-    options=context_data['Precinct'].dropna().unique(),
-    default=context_data['Precinct'].dropna().unique()
-)
-selected_category = st.sidebar.multiselect(
-    "Select Crime Category:",
-    options=context_data['Crime Against Category'].dropna().unique(),
-    default=context_data['Crime Against Category'].dropna().unique()
-)
+    # Contextual Visualizations
+    st.header("Contextual Visualizations of Seattle 911 Calls")
 
-# Filter contextual data
-context_data_filtered = context_data[
-    (context_data['Year'].isin(selected_year)) &
-    (context_data['Precinct'].isin(selected_precinct)) &
-    (context_data['Crime Against Category'].isin(selected_category))
-]
+    if crime_data.empty:
+        st.error("No data available.")
+        return
 
-# Crime Count by Precinct
-st.subheader("Crime Count by Precinct")
-precinct_chart = px.bar(
-    context_data_filtered.groupby('Precinct').size().reset_index(name='Count'),
-    x='Precinct',
-    y='Count',
-    title="Crime Count by Precinct",
-    labels={'Count': 'Crime Count', 'Precinct': 'Police Precinct'},
-    color='Precinct'
-)
-st.plotly_chart(precinct_chart, use_container_width=True)
+    plot_911_calls_by_month(crime_data)
+    st.write("""This stacked bar chart divides emergency calls into morning (AM) and evening (PM) categories for each month of the year.""")
 
-# Crime Categories Over Time
-st.subheader("Crime Categories Over Time")
-time_series_chart = px.line(
-    context_data_filtered.groupby(['Year', 'Crime Against Category']).size().reset_index(name='Count'),
-    x='Year',
-    y='Count',
-    color='Crime Against Category',
-    title="Crime Categories Over Time",
-    labels={'Year': 'Year', 'Count': 'Crime Count', 'Crime Against Category': 'Category'},
-    line_shape="linear"
-)
-time_series_chart.update_layout(xaxis=dict(type='category'))  # Force categorical x-axis
-st.plotly_chart(time_series_chart, use_container_width=True)
+    plot_911_calls_by_year(crime_data)
+    st.write("""The line chart illustrates annual variations in emergency call volumes.""")
 
-st.write("""
-This visualization provides an interactive exploration of crime trends in Seattle, segmented by precinct and crime category. 
-The bar chart highlights the distribution of crime counts across precincts, while the line chart shows trends in crime categories over time. 
-""")
+    plot_calls_by_priority_and_precinct(crime_data)
+    st.write("""This stacked bar chart highlights the distribution of calls by precinct and their assigned priority levels.""")
+
+    # Data Citations
+    st.subheader("**Data Sources**")
+    st.write("**1. Primary Dataset:**")
+    st.write("Dataset: [Seattle Crime Data](https://data.seattle.gov/Public-Safety/SPD-Crime-Data-2008-Present/tazs-3rd5/about_data)")
+    st.write("License: Public Domain")
+    st.write("**2. Contextual Dataset:**")
+    st.write("Dataset: [Seattle Calls Data](https://data.seattle.gov/Public-Safety/Call-Data/33kz-ixgy/data)")
+    st.write("License: Public Domain")
+
+if __name__ == "__main__":
+    main()
