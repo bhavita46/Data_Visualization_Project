@@ -78,7 +78,7 @@ def plot_911_calls_by_month(data):
     st.subheader("911 Calls by Month (AM/PM)")
     month_grouped = data.groupby(["month", "am_pm"]).size().unstack(fill_value=0)
     fig, ax = plt.subplots(figsize=(10, 6))
-    month_grouped.plot(kind="bar", stacked=True, color={"AM": "blue", "PM": "red"}, ax=ax)
+    month_grouped.plot(kind="bar", stacked=True, color={"AM": "#4a90e2", "PM": "#e94e77"}, ax=ax)  # Softer blue and red
     fig.patch.set_facecolor("black")
     ax.set_facecolor("black")
     ax.set_title("911 Calls by Month (AM/PM)", color="white", fontsize=16)
@@ -93,7 +93,7 @@ def plot_911_calls_by_month_line(data):
     st.subheader("911 Calls Per Month (July - December 2024)")
     month_grouped = data.groupby("month").size()
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(month_grouped.index, month_grouped.values, marker="o", linestyle="-", color="red", linewidth=2)
+    ax.plot(month_grouped.index, month_grouped.values, marker="o", linestyle="-", color="#e94e77", linewidth=2)  # Softer red
     fig.patch.set_facecolor("black")
     ax.set_facecolor("black")
     ax.set_title("911 Calls Per Month (July - December 2024)", color="white", fontsize=16)
