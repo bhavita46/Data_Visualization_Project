@@ -51,7 +51,20 @@ def fetch_crime_data(limit=50000):
     response = requests.get(API_URL, params=params)
     if response.status_code == 200:
         data = pd.DataFrame(response.json())
-        data["datetime"] = pd.to_datetime(data["event_clearance_date"], errors="coerce")
+
+        # Use the correct datetime column: original_time_queued
+        if "original_time_queued" in data.columns:
+            data["datetime"] = pd.to_datetime(data["original_time_queued"], errors="coerce")
+        else:
+            st.error("No valid datetime column found in the dataset.")
+            return pd.DataFrame()
+        
+        # Filter for the last 6 months of 2024
+        start_date = '2024-07-01'
+        end_date = '2024-12-31'
+        data = data[(data["datetime"] >= start_date) & (data["datetime"] <= end_date)]
+        
+        # Add additional columns for analysis
         data["month"] = data["datetime"].dt.month
         data["year"] = data["datetime"].dt.year
         data["am_pm"] = data["datetime"].dt.hour.apply(lambda x: "AM" if x < 12 else "PM")
@@ -128,6 +141,7 @@ def main():
             "style": {"color": "white"}
         },
     ))
+
 
     # Contextual Visualizations
     st.header("Contextual Visualizations of Seattle 911 Calls")
