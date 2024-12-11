@@ -36,13 +36,13 @@ st.write("Visualization by Bhavita Vijay Bhoir, Rekha Kandukuri, Shefali Saxena,
 # Load the filtered dataset for the map using caching
 @st.cache_data
 def load_map_data():
-    map_data_path = "filtered_last_6_months_2024.csv"  # Ensure this file is in the same directory
+    map_data_path = "filtered_data_last_6_months_2024.csv" 
     return pd.read_csv(map_data_path)
 
 # Load contextual data using caching
 @st.cache_data
 def load_contextual_data():
-    context_data_path = 'SPD_Crime_Data__2008-Present_20241122.csv'  # Update with the correct file path
+    context_data_path = 'SPD_Crime_Data__2008-Present_20241122.csv' 
     data = pd.read_csv(context_data_path)
     data['Offense Start DateTime'] = pd.to_datetime(data['Offense Start DateTime'], errors='coerce')
     data['Year'] = data['Offense Start DateTime'].dt.year
