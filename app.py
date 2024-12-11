@@ -17,7 +17,7 @@ data = load_data()
 
 # Map visualization
 st.subheader("Interactive Seattle Crime Location Map")
-st.write("This map shows the reported crimes in Seattle for the last six months of 2024. Hover over a point to view the type of crime and it's location.")
+st.write("This map shows the reported crimes in Seattle for the last six months of 2024. Hover over a point to view the details.")
 
 # Define Pydeck map configuration with focus on Seattle and top-down view
 seattle_lat, seattle_lon = 47.608013, -122.335167  # Coordinates for Seattle
@@ -49,7 +49,11 @@ st.pydeck_chart(pdk.Deck(
         ),
     ],
     tooltip={
-        "html": "<b>Crime Type:</b> {Offense}<br><b>Location:</b> {100 Block Address}",
+        "html": """
+        <b>Crime Type:</b> {Offense}<br>
+        <b>Location:</b> {100 Block Address}<br>
+        <b>Date:</b> {Offense Start DateTime}
+        """,
         "style": {"color": "white"}
     },
 ))
