@@ -2,11 +2,11 @@
 import subprocess
 import sys
 
-# Function to install missing libraries
+# Function to install missing libraries (as it was noticed they required explicit installation)
 def install(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
-# Install required libraries
+# Installing required libraries
 try:
     import plotly.express as px
 except ImportError:
@@ -34,13 +34,54 @@ import seaborn as sns
 st.title("Seattle Crime Data Visualization")
 st.write("Visualization by Bhavita Vijay Bhoir, Rekha Kandukuri, Shefali Saxena, and Vikramjeet Singh Kundu")
 
-# Load the filtered dataset for the map using caching
+# Loading the filtered dataset for the map using caching
 @st.cache_data
 def load_map_data():
-    map_data_path = "filtered_data_last_6_months_2024.csv"  # Ensure this file is in the same directory
+    map_data_path = "filtered_data_last_6_months_2024.csv"  
     return pd.read_csv(map_data_path)
 
-# Load contextual data using caching
+# Crime Count by Precinct
+def plot_crime_count_by_precinct(data):
+    st.subheader("Crime Count by Precinct")
+    precinct_chart = px.bar(
+        data.groupby("Precinct").size().reset_index(name="Crime Count"),
+        x="Precinct",
+        y="Crime Count",
+        color="Precinct",
+        title="Crime Count by Precinct",
+        labels={"Precinct": "Police Precinct", "Crime Count": "Crime Count"},
+        color_discrete_sequence=px.colors.qualitative.Set2,
+    )
+    precinct_chart.update_layout(
+        paper_bgcolor="black",
+        plot_bgcolor="black",
+        font_color="white",
+        title_font_color="white",
+    )
+    st.plotly_chart(precinct_chart, use_container_width=True)
+
+# Crime Categories Over Time
+def plot_crime_categories_over_time(data):
+    st.subheader("Crime Categories Over Time")
+    time_series_chart = px.line(
+        data.groupby(["Offense Start DateTime", "Crime Against Category"]).size().reset_index(name="Crime Count"),
+        x="Offense Start DateTime",
+        y="Crime Count",
+        color="Crime Against Category",
+        title="Crime Categories Over Time",
+        labels={"Offense Start DateTime": "Date", "Crime Count": "Crime Count", "Crime Against Category": "Category"},
+        line_shape="linear",
+    )
+    time_series_chart.update_layout(
+        paper_bgcolor="black",
+        plot_bgcolor="black",
+        font_color="white",
+        title_font_color="white",
+    )
+    st.plotly_chart(time_series_chart, use_container_width=True)
+
+
+# Loading the contextual data using caching
 @st.cache_data
 def fetch_crime_data(limit=50000):
     API_URL = "https://data.seattle.gov/resource/33kz-ixgy.json"
@@ -52,19 +93,19 @@ def fetch_crime_data(limit=50000):
     if response.status_code == 200:
         data = pd.DataFrame(response.json())
 
-        # Use the correct datetime column: original_time_queued
+        # Using the correct datetime column: original_time_queued
         if "original_time_queued" in data.columns:
             data["datetime"] = pd.to_datetime(data["original_time_queued"], errors="coerce")
         else:
             st.error("No valid datetime column found in the dataset.")
             return pd.DataFrame()
         
-        # Filter for the last 6 months of 2024
+        # Filtering for the last 6 months of 2024
         start_date = '2024-07-01'
         end_date = '2024-12-31'
         data = data[(data["datetime"] >= start_date) & (data["datetime"] <= end_date)]
         
-        # Add additional columns for analysis
+        # Adding additional columns for analysis
         data["month"] = data["datetime"].dt.month
         data["year"] = data["datetime"].dt.year
         data["am_pm"] = data["datetime"].dt.hour.apply(lambda x: "AM" if x < 12 else "PM")
@@ -129,7 +170,25 @@ def plot_calls_by_priority_and_precinct(data):
 def main():
     # Load data
     map_data = load_map_data()
-    crime_data = fetch_crime_data(limit=50000)
+
+    # Sidebar Filters
+    st.sidebar.header("Filter Data")
+    precinct_filter = st.sidebar.multiselect(
+        "Select Precinct(s):",
+        options=map_data["Precinct"].dropna().unique(),
+        default=map_data["Precinct"].dropna().unique(),
+    )
+    category_filter = st.sidebar.multiselect(
+        "Select Crime Category:",
+        options=map_data["Crime Against Category"].dropna().unique(),
+        default=map_data["Crime Against Category"].dropna().unique(),
+    )
+
+    # Apply Filters
+    filtered_data = map_data[
+        (map_data["Precinct"].isin(precinct_filter)) &
+        (map_data["Crime Against Category"].isin(category_filter))
+    ]
 
     # Map Visualization
     st.header("Interactive Crime Location Map")
@@ -146,7 +205,7 @@ def main():
         layers=[
             pdk.Layer(
                 'ScatterplotLayer',
-                data=map_data,
+                data=filtered_data,
                 get_position='[Longitude, Latitude]',
                 get_color='[200, 30, 0, 160]',
                 get_radius=50,
@@ -163,6 +222,11 @@ def main():
         },
     ))
 
+    # Crime Count by Precinct
+    plot_crime_count_by_precinct(filtered_data)
+
+    # Crime Categories Over Time
+    plot_crime_categories_over_time(filtered_data)
 
     # Contextual Visualizations
     st.header("Contextual Visualizations of Seattle 911 Calls")
