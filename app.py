@@ -40,47 +40,6 @@ def load_map_data():
     map_data_path = "filtered_data_last_6_months_2024.csv"  
     return pd.read_csv(map_data_path)
 
-# Crime Count by Precinct
-def plot_crime_count_by_precinct(data):
-    st.subheader("Crime Count by Precinct")
-    precinct_chart = px.bar(
-        data.groupby("Precinct").size().reset_index(name="Crime Count"),
-        x="Precinct",
-        y="Crime Count",
-        color="Precinct",
-        title="Crime Count by Precinct",
-        labels={"Precinct": "Police Precinct", "Crime Count": "Crime Count"},
-        color_discrete_sequence=px.colors.qualitative.Set2,
-    )
-    precinct_chart.update_layout(
-        paper_bgcolor="black",
-        plot_bgcolor="black",
-        font_color="white",
-        title_font_color="white",
-    )
-    st.plotly_chart(precinct_chart, use_container_width=True)
-
-# Crime Categories Over Time
-def plot_crime_categories_over_time(data):
-    st.subheader("Crime Categories Over Time")
-    time_series_chart = px.line(
-        data.groupby(["Offense Start DateTime", "Crime Against Category"]).size().reset_index(name="Crime Count"),
-        x="Offense Start DateTime",
-        y="Crime Count",
-        color="Crime Against Category",
-        title="Crime Categories Over Time",
-        labels={"Offense Start DateTime": "Date", "Crime Count": "Crime Count", "Crime Against Category": "Category"},
-        line_shape="linear",
-    )
-    time_series_chart.update_layout(
-        paper_bgcolor="black",
-        plot_bgcolor="black",
-        font_color="white",
-        title_font_color="white",
-    )
-    st.plotly_chart(time_series_chart, use_container_width=True)
-
-
 # Loading the contextual data using caching
 @st.cache_data
 def fetch_crime_data(limit=50000):
@@ -115,6 +74,44 @@ def fetch_crime_data(limit=50000):
         return pd.DataFrame()
 
 # Visualizations
+def plot_crime_count_by_precinct(data):
+    st.subheader("Crime Count by Precinct")
+    precinct_chart = px.bar(
+        data.groupby("Precinct").size().reset_index(name="Crime Count"),
+        x="Precinct",
+        y="Crime Count",
+        color="Precinct",
+        title="Crime Count by Precinct",
+        labels={"Precinct": "Police Precinct", "Crime Count": "Crime Count"},
+        color_discrete_sequence=px.colors.qualitative.Set2,
+    )
+    precinct_chart.update_layout(
+        paper_bgcolor="black",
+        plot_bgcolor="black",
+        font_color="white",
+        title_font_color="white",
+    )
+    st.plotly_chart(precinct_chart, use_container_width=True)
+
+def plot_crime_categories_over_time(data):
+    st.subheader("Crime Categories Over Time")
+    time_series_chart = px.line(
+        data.groupby(["datetime", "Crime Against Category"]).size().reset_index(name="Crime Count"),
+        x="datetime",
+        y="Crime Count",
+        color="Crime Against Category",
+        title="Crime Categories Over Time",
+        labels={"datetime": "Date", "Crime Count": "Crime Count", "Crime Against Category": "Category"},
+        line_shape="linear",
+    )
+    time_series_chart.update_layout(
+        paper_bgcolor="black",
+        plot_bgcolor="black",
+        font_color="white",
+        title_font_color="white",
+    )
+    st.plotly_chart(time_series_chart, use_container_width=True)
+
 def plot_911_calls_by_month(data):
     st.subheader("911 Calls by Month (AM/PM)")
     month_grouped = data.groupby(["month", "am_pm"]).size().unstack(fill_value=0)
@@ -168,8 +165,9 @@ def plot_calls_by_priority_and_precinct(data):
 
 # Main Streamlit App
 def main():
-    # Load data
+    # Loading data
     map_data = load_map_data()
+    crime_data = fetch_crime_data(limit=50000)
 
     # Sidebar Filters
     st.sidebar.header("Filter Data")
@@ -236,13 +234,8 @@ def main():
         return
 
     plot_911_calls_by_month(crime_data)
-    st.write("""This stacked bar chart divides emergency calls into morning (AM) and evening (PM) categories for each month of the year.""")
-
     plot_911_calls_by_month_line(crime_data)
-    st.write("""The line chart illustrates annual variations in emergency call volumes.""")
-
     plot_calls_by_priority_and_precinct(crime_data)
-    st.write("""This stacked bar chart highlights the distribution of calls by precinct and their assigned priority levels.""")
 
     # Data Citations
     st.subheader("**Data Sources**")
