@@ -1,7 +1,16 @@
+import subprocess
+import sys
+
+# Ensuring `plotly` is installed
+try:
+    import plotly.express as px
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "plotly"])
+    import plotly.express as px
+
 import streamlit as st
 import pandas as pd
 import pydeck as pdk
-import plotly.express as px
 import matplotlib.pyplot as plt
 import requests
 import seaborn as sns
