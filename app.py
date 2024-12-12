@@ -1,4 +1,4 @@
-```python
+
 # Ensuring plotly, matplotlib and seaborn are installed
 import subprocess
 import sys
