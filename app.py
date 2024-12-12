@@ -96,7 +96,6 @@ def fetch_crime_data(limit=50000):
         return pd.DataFrame()
 
 def plot_crime_count_by_precinct(data):
-    st.subheader("Crime Count by Precinct")
     precinct_grouped = data.groupby("Precinct").size().reset_index(name="Crime Count")
     precincts = precinct_grouped["Precinct"].unique()
     precinct_colors = get_contrasting_colors(len(precincts), palette="viridis")
@@ -125,7 +124,6 @@ def plot_crime_count_by_precinct(data):
     st.plotly_chart(precinct_chart, use_container_width=True)
 
 def plot_911_calls_by_month(data):
-    st.subheader("911 Calls by Month (AM/PM)")
     month_grouped = data.groupby(["month", "am_pm"]).size().unstack(fill_value=0)
     month_grouped.index = month_grouped.index.map({7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'})  
 
@@ -161,7 +159,6 @@ def plot_911_calls_by_month(data):
     st.pyplot(fig)
 
 def plot_calls_by_priority_and_precinct(data):
-    st.subheader("911 Calls by Precinct and Priority")
     if "precinct" in data.columns and "priority" in data.columns:
         priority_precinct_grouped = data.groupby(["precinct", "priority"]).size().unstack(fill_value=0)
         
@@ -202,7 +199,7 @@ def main():
     map_data = load_map_data()
     crime_data = fetch_crime_data(limit=50000)
 
-    st.markdown("**Seattle Crime Data Visualization**")
+    st.title("seattle crim data visualization")
     st.write("*By Bhavita Vijay Bhoir, Rekha Kandukuri, Shefali Saxena, and Vikramjeet Singh Kundu*")
 
     st.markdown("""**Introduction**  
@@ -225,13 +222,12 @@ The materials presented here integrate spatial, temporal, and categorical dimens
     # More blue-ish tone from viridis:
     viridis_point_color = [39, 127, 142, 160]
 
-    st.markdown("""**Central Interactive Visualization: Crime Map**  
+    st.markdown("""**Interative crime location map**  
 The central element of this presentation is an interactive map depicting reported crime incidents in Seattle during the final six months of 2024. Each point on the map corresponds to a reported crime, enriched with details regarding the nature of the offense, its approximate location, and the associated date. Users can filter these data points by precinct, thereby enabling focused exploration of specific localities.
 
 This cartographic representation allows viewers to discern spatial patterns that might otherwise remain opaque. The map’s dark background and carefully selected bluish hue for the markers create a high-contrast visual environment, ensuring legibility and drawing the eye to areas of concentrated activity. Such geographic context is critical: the distribution of criminal incidents often correlates with neighborhood characteristics, transportation hubs, or economic centers.
 """)
 
-    st.header("Interactive Crime Location Map")
     st.write("This map shows reported crimes in Seattle for the last six months of 2024.")
     seattle_lat, seattle_lon = 47.608013, -122.335167
     st.pydeck_chart(pdk.Deck(
@@ -268,7 +264,6 @@ Complementing the map, a bar chart visualizing the total crime count by precinct
 This representation offers a stable reference point. While the map conveys geographic nuance, the bar chart isolates and highlights the scale of reported crimes in each jurisdiction. In doing so, it fosters a straightforward understanding of where incident volume may be highest, prompting questions about underlying factors influencing these differences.
 """)
 
-    # Crime Count by Precinct
     plot_crime_count_by_precinct(filtered_data)
 
     st.markdown("""**911 Calls by Month (AM/PM)**  
@@ -277,8 +272,7 @@ Temporal patterns are equally critical to a thorough interpretation of public sa
 This temporal dimension enhances the context provided by the map and the precinct-based counts, suggesting when emergency resources may be most strained. Seasonal peaks or consistent nocturnal increases in call volume can inform resource scheduling and preventive measures.
 """)
 
-    # Contextual Visualizations
-    st.header("Contextual Visualizations of Seattle 911 Calls")
+    
 
     if crime_data.empty:
         st.error("No data available.")
