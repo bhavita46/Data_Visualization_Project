@@ -1,3 +1,4 @@
+```python
 # Ensuring plotly, matplotlib and seaborn are installed
 import subprocess
 import sys
@@ -118,6 +119,11 @@ def plot_crime_count_by_precinct(data):
         font_color="white",
         title_font_color="white",
         legend_title="Precinct",
+        legend=dict(
+            font=dict(color="white"),
+            title=dict(font=dict(color="white")),
+            bgcolor="black",
+        ),
         xaxis=dict(showline=False, showgrid=False, zeroline=False),
         yaxis=dict(showline=False, showgrid=False, zeroline=False),
     )
@@ -199,10 +205,10 @@ def main():
     map_data = load_map_data()
     crime_data = fetch_crime_data(limit=50000)
 
-    st.title("Seattle crime data visualization")
+    st.title("Seattle crime Data Visualization")
     st.write("*By Bhavita Vijay Bhoir, Rekha Kandukuri, Shefali Saxena, and Vikramjeet Singh Kundu*")
 
-    st.markdown("""**Introduction**  
+    st.markdown("""## Introduction  
 Seattle’s diverse neighborhoods exhibit a range of public safety conditions, influenced by factors such as population density, commercial activity, and local infrastructure. Analyzing crime data in a way that is accessible, clear, and meaningful can inform policy decisions, resource allocation, and community engagement strategies. In an effort to render complex data more understandable, we present a series of visualizations that transform raw crime and emergency call data into a suite of interactive, interpretable tools for both stakeholders and the general public.
 
 The materials presented here integrate spatial, temporal, and categorical dimensions of crime and emergency responses, facilitating a more comprehensive understanding of Seattle’s public safety landscape. By examining these visual representations, readers can better appreciate patterns of criminal activity, distributions of reported incidents, and the dynamics of 911 call priorities. This holistic approach aims to support dialogue and decision-making grounded in empirical evidence.
@@ -222,7 +228,7 @@ The materials presented here integrate spatial, temporal, and categorical dimens
     # More blue-ish tone from viridis:
     viridis_point_color = [39, 127, 142, 160]
 
-    st.markdown("""**Interative crime location map**  
+    st.markdown("""## Interative crime location map  
 The central element of this presentation is an interactive map depicting reported crime incidents in Seattle during the final six months of 2024. Each point on the map corresponds to a reported crime, enriched with details regarding the nature of the offense, its approximate location, and the associated date. Users can filter these data points by precinct, thereby enabling focused exploration of specific localities.
 
 This cartographic representation allows viewers to discern spatial patterns that might otherwise remain opaque. The map’s dark background and carefully selected bluish hue for the markers create a high-contrast visual environment, ensuring legibility and drawing the eye to areas of concentrated activity. Such geographic context is critical: the distribution of criminal incidents often correlates with neighborhood characteristics, transportation hubs, or economic centers.
@@ -258,7 +264,7 @@ This cartographic representation allows viewers to discern spatial patterns that
         },
     ))
 
-    st.markdown("""**Crime Count by Precinct**  
+    st.markdown("""## Crime Count by Precinct  
 Complementing the map, a bar chart visualizing the total crime count by precinct provides a categorical summary of incident frequency. Each bar corresponds to a particular precinct, enabling users to compare relative crime levels across different segments of the city.
 
 This representation offers a stable reference point. While the map conveys geographic nuance, the bar chart isolates and highlights the scale of reported crimes in each jurisdiction. In doing so, it fosters a straightforward understanding of where incident volume may be highest, prompting questions about underlying factors influencing these differences.
@@ -266,13 +272,11 @@ This representation offers a stable reference point. While the map conveys geogr
 
     plot_crime_count_by_precinct(filtered_data)
 
-    st.markdown("""**911 Calls by Month (AM/PM)**  
+    st.markdown("""## 911 Calls by Month (AM/PM)  
 Temporal patterns are equally critical to a thorough interpretation of public safety data. The stacked bar chart of 911 calls by month, separated into AM and PM intervals, illustrates how call volumes fluctuate over time. By examining differences in morning versus evening call counts, one may identify seasonal trends or time-of-day patterns that influence public safety demands.
 
 This temporal dimension enhances the context provided by the map and the precinct-based counts, suggesting when emergency resources may be most strained. Seasonal peaks or consistent nocturnal increases in call volume can inform resource scheduling and preventive measures.
 """)
-
-    
 
     if crime_data.empty:
         st.error("No data available.")
@@ -280,7 +284,7 @@ This temporal dimension enhances the context provided by the map and the precinc
 
     plot_911_calls_by_month(crime_data)
 
-    st.markdown("""**911 Calls by Precinct and Priority**  
+    st.markdown("""## 911 Calls by Precinct and Priority  
 To further deepen our understanding of the data, we present a stacked bar chart detailing 911 calls by precinct, differentiated by priority level. This visual delineates not only how many calls a given precinct receives, but also the nature of those calls in terms of urgency.
 
 By viewing priority levels alongside geographic segments, one can ascertain whether certain precincts routinely handle more high-priority, time-sensitive incidents. This insight adds explanatory power to the raw crime counts: understanding that some areas manage a higher proportion of critical calls may indicate differing types of challenges and may justify a reevaluation of resource distribution strategies.
@@ -288,7 +292,7 @@ By viewing priority levels alongside geographic segments, one can ascertain whet
 
     plot_calls_by_priority_and_precinct(crime_data)
 
-    st.markdown("""**Inspiration and Additional Context**  
+    st.markdown("""## Inspiration and Additional Context  
 In designing these contextual visualizations, we drew inspiration from approaches employed elsewhere, including the strategies showcased at [this reference link](https://rpubs.com/swalsh114/1006412). Observing the effective use of color, composition, and data structuring in external examples informed our design decisions, ensuring that our representations are both rigorous and accessible.
 
 The integration of multiple data dimensions—spatial, temporal, and categorical—enables a more nuanced reading of Seattle’s crime and emergency call landscape. For instance, while the “Crime Count by Precinct” chart identifies areas with higher incident frequencies, the priority-level breakdown and monthly call distributions contextualize these figures. Together, these visuals present a multidimensional narrative that moves beyond static counts, supporting informed debate, policy formulation, and resource prioritization.
@@ -302,3 +306,4 @@ The integration of multiple data dimensions—spatial, temporal, and categorical
 
 if __name__ == "__main__":
     main()
+```
