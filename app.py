@@ -199,7 +199,7 @@ def main():
     map_data = load_map_data()
     crime_data = fetch_crime_data(limit=50000)
 
-    st.title("seattle crim data visualization")
+    st.title("Seattle crime data visualization")
     st.write("*By Bhavita Vijay Bhoir, Rekha Kandukuri, Shefali Saxena, and Vikramjeet Singh Kundu*")
 
     st.markdown("""**Introduction**  
