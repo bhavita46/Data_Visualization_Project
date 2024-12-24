@@ -228,7 +228,7 @@ The materials presented here integrate spatial, temporal, and categorical dimens
     # More blue-ish tone from viridis:
     viridis_point_color = [39, 127, 142, 160]
 
-    st.markdown("""## Interative crime location map  
+    st.markdown("""## Interactive crime location map  
 The central element of this presentation is an interactive map depicting reported crime incidents in Seattle during the final six months of 2024. Each point on the map corresponds to a reported crime, enriched with details regarding the nature of the offense, its approximate location, and the associated date. Users can filter these data points by precinct, thereby enabling focused exploration of specific localities.
 
 This cartographic representation allows viewers to discern spatial patterns that might otherwise remain opaque. The map’s dark background and carefully selected bluish hue for the markers create a high-contrast visual environment, ensuring legibility and drawing the eye to areas of concentrated activity. Such geographic context is critical: the distribution of criminal incidents often correlates with neighborhood characteristics, transportation hubs, or economic centers.
