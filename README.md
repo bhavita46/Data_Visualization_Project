@@ -6,9 +6,7 @@ This interactive Streamlit app provides an intuitive and engaging platform to ex
 
 ## 🌟 Live Demo
 
-Experience the app live on Hugging Face Spaces:
-
-[![Hugging Face Spaces](https://img.shields.io/badge/Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/bhavita46/DataViz_FinalProject_3.1)
+### [👉 Click Here to View the App on Hugging Face](https://huggingface.co/spaces/bhavita46/DataViz_FinalProject_3.1)
 
 ---
 
